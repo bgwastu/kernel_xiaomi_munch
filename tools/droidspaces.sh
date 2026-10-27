@@ -91,6 +91,9 @@ configure_droidspaces_non_gki() {
         IP_ADVANCED_ROUTER IP_MULTIPLE_TABLES
     )
 
+    # NOTE: CGROUP_NET_PRIO is intentionally NOT enabled: this tree's modernized
+    # cgroup headers lack struct cgroup::id, which netprio_cgroup.h requires.
+    # Docker (overlay2 + nft/iptables NAT) does not need the net_prio controller.
     echo "Enable official Droidspaces non-GKI kernel configuration..."
     scripts/config --file "${out_dir}/.config" \
         -e SYSCTL \
@@ -109,7 +112,6 @@ configure_droidspaces_non_gki() {
         -e CGROUP_SCHED \
         -e FAIR_GROUP_SCHED \
         -e CGROUP_FREEZER \
-        -e CGROUP_NET_PRIO \
         -e DEVTMPFS \
         -e OVERLAY_FS \
         -e TMPFS_POSIX_ACL \
