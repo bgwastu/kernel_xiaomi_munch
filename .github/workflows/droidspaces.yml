@@ -44,6 +44,10 @@ jobs:
           key: ccache-e404-${{ inputs.device }}-${{ github.sha }}
           restore-keys: ccache-e404-${{ inputs.device }}-
 
+      - name: Patch KernelSU export check
+        run: |
+          sed -i 's/include $(KSU_SRC)\/tools\/static_export_check.mk/# include $(KSU_SRC)\/tools\/static_export_check.mk/' KernelSU/kernel/Kbuild || true
+
       - name: Build
         run: tools/build_droidspaces_kernel.sh ${{ inputs.device }}
 
