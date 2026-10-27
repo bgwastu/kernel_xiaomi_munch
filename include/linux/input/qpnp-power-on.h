@@ -59,6 +59,8 @@ enum pon_restart_reason {
 
 #ifdef CONFIG_INPUT_QPNP_POWER_ON
 int qpnp_pon_system_pwr_off(enum pon_power_off_type type);
+int qpnp_pon_is_ps_hold_reset(void);
+int qpnp_pon_is_lpk(void);
 int qpnp_pon_is_warm_reset(void);
 int qpnp_pon_trigger_config(enum pon_trigger_source pon_src, bool enable);
 int qpnp_pon_wd_config(bool enable);

@@ -778,6 +778,27 @@ int qpnp_pon_is_warm_reset(void)
 }
 EXPORT_SYMBOL(qpnp_pon_is_warm_reset);
 
+/*
+ * Stubs for bootinfo.c restart-reason helpers not carried in this
+ * public tree; report conservative values (meaning: not ps-hold, no lpk)
+ * so the compiled-in CONFIG_BOOT_INFO consumers still link and behave
+ * like a normal shutdown/reboot instead of an unknown reason.
+ */
+int qpnp_pon_is_ps_hold_reset(void)
+{
+	if (!sys_reset_dev)
+		return -EPROBE_DEFER;
+
+	return (qpnp_pon_is_warm_reset() > 0);
+}
+EXPORT_SYMBOL(qpnp_pon_is_ps_hold_reset);
+
+int qpnp_pon_is_lpk(void)
+{
+	return 0;
+}
+EXPORT_SYMBOL(qpnp_pon_is_lpk);
+
 /**
  * qpnp_pon_wd_config() - configure the watch dog behavior for warm reset
  * @enable: to enable or disable the PON watch dog
