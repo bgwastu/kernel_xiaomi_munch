@@ -44,6 +44,12 @@ jobs:
           key: ccache-${{ inputs.device }}-${{ github.sha }}
           restore-keys: ccache-${{ inputs.device }}-
 
+      - name: Fix source inconsistencies
+        run: |
+          sed -i 's/->__state/->state/g' kernel/sched/fair.c
+          sed -i 's/\*uninitialized_var(\([a-z_]*\));/*\1 = NULL;/' mm/memcontrol.c
+          grep -rn '__state\|uninitialized_var' kernel/sched mm/memcontrol.c || true
+
       - name: Build
         run: tools/build_droidspaces_kernel.sh ${{ inputs.device }}
 
