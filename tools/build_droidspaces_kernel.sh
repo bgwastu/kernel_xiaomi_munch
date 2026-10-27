@@ -1,14 +1,5 @@
 #!/usr/bin/env bash
-# Build the munch kernel with Droidspaces support.
-#
-# IMPORTANT: this tree is munch-devs/e404 — the same 4.19.404R lineage the
-# Infinity-X ROM's stock kernel was built from. A previous attempt used the
-# Matrixx-Devices tree, which is NOT compatible with this ROM's userspace and
-# crashed system_server continuously. To stay as close to the ROM as possible,
-# we seed the config from the RUNNING stock kernel (captured /proc/config.gz,
-# committed as munch_stock.config) and only override the symbols Droidspaces
-# needs. KernelSU is left disabled (unchanged from stock; the ROM roots via
-# Magisk).
+# Build the munch kernel with Droidspaces support using e404's official vendor/munch_defconfig.
 set -euo pipefail
 
 DEVICE="${1:-munch}"
@@ -29,9 +20,9 @@ clang --version | head -1
 integrate_droidspaces_non_gki
 
 mkdir -p "$OUT_DIR"
-cp "arch/arm64/configs/vendor/${DEVICE}_stock.config" "$OUT_DIR/.config"
+make "${MAKE_OPTS[@]}" "vendor/${DEVICE}_defconfig"
 
-# KernelSU off, matching the ROM's shipped kernel, before dependency resolution.
+# Disable KernelSU to keep boot clean (ROM uses Magisk)
 scripts/config --file "$OUT_DIR/.config" -d KSU -d KSU_MANUAL_HOOK
 
 configure_droidspaces_non_gki "$OUT_DIR"
