@@ -25,11 +25,14 @@ make "${MAKE_OPTS[@]}" "vendor/${DEVICE}_defconfig"
 # Enable PSI (Pressure Stall Information) required by Android 16 lmkd
 scripts/config --file "$OUT_DIR/.config" -e PSI -d PSI_DEFAULT_DISABLED
 
+# Enable KernelSU with KALLSYMS_ALL (bypasses static_export_check and provides root)
+scripts/config --file "$OUT_DIR/.config" -e DEBUG_KERNEL -e KALLSYMS -e KALLSYMS_ALL -e KSU -e KSU_MANUAL_HOOK
+
 configure_droidspaces_non_gki "$OUT_DIR"
 make "${MAKE_OPTS[@]}"
 
 for f in Image dtb dtbo.img; do
     test -f "$OUT_DIR/arch/arm64/boot/$f" || { echo "missing $f"; exit 1; }
 done
-grep -E '^CONFIG_(PID_NS|UTS_NS|IPC_NS|USER_NS|NET_NS|PSI|KSU)=' "$OUT_DIR/.config"
+grep -E '^CONFIG_(PID_NS|UTS_NS|IPC_NS|USER_NS|NET_NS|PSI|KSU|KALLSYMS_ALL)=' "$OUT_DIR/.config"
 echo "build ok"
