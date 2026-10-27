@@ -1,0 +1,73 @@
+name: Build munch + Droidspaces (e404)
+
+on:
+  workflow_dispatch:
+    inputs:
+      device:
+        description: 'Device'
+        required: true
+        default: 'munch'
+        type: choice
+        options: [munch, alioth, apollo, lmi, pipa]
+
+env:
+  CCACHE_DIR: ${{ github.workspace }}/.ccache
+  CCACHE_MAXSIZE: 5G
+  CLANG_DIR: ${{ github.workspace }}/../clang
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Install build deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends bc bison build-essential ccache flex libssl-dev libelf-dev lz4 zip python3 dwarves
+
+      - name: Fetch AOSP clang r563880
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse -b android16-qpr1-release \
+            https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 "$RUNNER_TEMP/prebuilts"
+          git -C "$RUNNER_TEMP/prebuilts" sparse-checkout set clang-r563880
+          mv "$RUNNER_TEMP/prebuilts/clang-r563880" "$CLANG_DIR"
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-e404-${{ inputs.device }}-${{ github.sha }}
+          restore-keys: ccache-e404-${{ inputs.device }}-
+
+      - name: Build
+        run: tools/build_droidspaces_kernel.sh ${{ inputs.device }}
+
+      - name: Save ccache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-e404-${{ inputs.device }}-${{ github.sha }}
+
+      - name: Package
+        run: |
+          git clone --depth 1 https://github.com/AstideLabs/AnyKernel3 -b munch ak3 || \
+          git clone --depth 1 https://github.com/AstideLabs/AnyKernel3 -b kona ak3
+          sed -i "s/^device\.name1=.*/device.name1=/" ak3/anykernel.sh || true
+          mkdir -p ak3/kernels/aosp
+          cp out/arch/arm64/boot/Image out/arch/arm64/boot/dtb out/arch/arm64/boot/dtbo.img ak3/kernels/aosp/
+          (cd ak3 && zip -qr9 ../E404-Droidspaces-${{ inputs.device }}.zip . -x '.git/*')
+          mkdir -p dist && cp out/arch/arm64/boot/Image dist/Image-${{ inputs.device }} && cp out/.config dist/config-${{ inputs.device }}
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            E404-Droidspaces-${{ inputs.device }}.zip
+            dist/*
+          tag_name: droidspaces-e404-${{ inputs.device }}-${{ github.run_id }}
+          name: "e404 munch + Droidspaces (${{ github.run_id }})"
