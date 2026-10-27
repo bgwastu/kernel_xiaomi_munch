@@ -22,8 +22,6 @@ integrate_droidspaces_non_gki
 mkdir -p "$OUT_DIR"
 make "${MAKE_OPTS[@]}" "vendor/${DEVICE}_defconfig"
 
-# Disable KernelSU to keep boot clean (ROM uses Magisk)
-scripts/config --file "$OUT_DIR/.config" -d KSU -d KSU_MANUAL_HOOK
 
 configure_droidspaces_non_gki "$OUT_DIR"
 make "${MAKE_OPTS[@]}"
