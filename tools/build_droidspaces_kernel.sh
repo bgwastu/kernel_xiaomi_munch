@@ -22,6 +22,8 @@ integrate_droidspaces_non_gki
 mkdir -p "$OUT_DIR"
 make "${MAKE_OPTS[@]}" "vendor/${DEVICE}_defconfig"
 
+# Enable PSI (Pressure Stall Information) required by Android 16 lmkd
+scripts/config --file "$OUT_DIR/.config" -e PSI -d PSI_DEFAULT_DISABLED
 
 configure_droidspaces_non_gki "$OUT_DIR"
 make "${MAKE_OPTS[@]}"
@@ -29,5 +31,5 @@ make "${MAKE_OPTS[@]}"
 for f in Image dtb dtbo.img; do
     test -f "$OUT_DIR/arch/arm64/boot/$f" || { echo "missing $f"; exit 1; }
 done
-grep -E '^CONFIG_(PID_NS|UTS_NS|IPC_NS|VETH|DEVTMPFS)=' "$OUT_DIR/.config"
+grep -E '^CONFIG_(PID_NS|UTS_NS|IPC_NS|USER_NS|NET_NS|PSI|KSU)=' "$OUT_DIR/.config"
 echo "build ok"
