@@ -26,7 +26,7 @@ make "${MAKE_OPTS[@]}" "vendor/${DEVICE}_defconfig"
 scripts/config --file "$OUT_DIR/.config" -e PSI -d PSI_DEFAULT_DISABLED
 
 # Enable KernelSU with KALLSYMS_ALL (bypasses static_export_check and provides root)
-scripts/config --file "$OUT_DIR/.config" -e DEBUG_KERNEL -e KALLSYMS -e KALLSYMS_ALL -e KSU -e KSU_MANUAL_HOOK
+scripts/config --file "$OUT_DIR/.config" -e KALLSYMS -e KALLSYMS_ALL -e KSU -e KSU_MANUAL_HOOK
 
 configure_droidspaces_non_gki "$OUT_DIR"
 make "${MAKE_OPTS[@]}"
