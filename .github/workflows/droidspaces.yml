@@ -45,6 +45,10 @@ jobs:
           key: ccache-e404-${{ inputs.device }}-${{ github.sha }}
           restore-keys: ccache-e404-${{ inputs.device }}-
 
+      - name: Patch KernelSU-Next avtab flex_array for 4.19
+        run: |
+          sed -i 's/LINUX_VERSION_CODE < KERNEL_VERSION(5, 0, 0)/0/g' KernelSU/kernel/selinux/sepolicy.c
+
       - name: Build
         run: tools/build_droidspaces_kernel.sh ${{ inputs.device }}
 
