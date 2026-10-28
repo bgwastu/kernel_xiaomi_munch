@@ -44,9 +44,9 @@ jobs:
           key: ccache-e404-${{ inputs.device }}-${{ github.sha }}
           restore-keys: ccache-e404-${{ inputs.device }}-
 
-      - name: Patch KernelSU export check and bump version
+      - name: Configure KernelSU-Next version
         run: |
-          sed -i 's/include $(KSU_SRC)\/tools\/static_export_check.mk/# include $(KSU_SRC)\/tools\/static_export_check.mk/' KernelSU/kernel/Kbuild || true
+          sed -i 's/KSU_VERSION=.*/KSU_VERSION=35052/' KernelSU/kernel/Kbuild || true
           sed -i 's/KSU_VERSION := .*/KSU_VERSION := 35052/' KernelSU/kernel/Kbuild || true
 
       - name: Build
